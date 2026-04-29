@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMessageCircle, FiX, FiSend, FiCpu, FiUser } from 'react-icons/fi';
-import { io } from 'socket.io-client';
-
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { useTheme } from '../../context/ThemeContext';
 
 const quickActions = [
   '🔍 Find jobs for me',
@@ -20,37 +18,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
   const messagesEndRef = useRef(null);
-  const socketRef = useRef(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    if (!socketRef.current) {
-      socketRef.current = io(SOCKET_URL);
-
-      socketRef.current.on('chat:response', (data) => {
-        setMessages(prev => [...prev, { role: 'ai', content: data.content }]);
-      });
-
-      socketRef.current.on('chat:typing', (isTyping) => {
-        setTyping(isTyping);
-      });
-
-      socketRef.current.on('chat:error', (error) => {
-        setMessages(prev => [...prev, { role: 'ai', content: "Sorry, connection error. 😔" }]);
-      });
-    }
-
-    return () => {
-      // Keep socket alive while open, disconnect if unmounted or closed if desired
-      // We can keep it alive.
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    return () => {
-      if (socketRef.current) socketRef.current.disconnect();
-    };
-  }, []);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,10 +30,19 @@ export default function ChatWidget() {
 
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setInput('');
-    
-    if (socketRef.current) {
-      socketRef.current.emit('chat:message', { message: msg, mode: 'general' });
-    }
+
+    // Mock AI response
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+      const responses = [
+        "I can help you with that! Let me look into some options for you. 🔍",
+        "Great question! Based on current trends, I'd recommend focusing on skills like React, Python, and cloud computing. 📈",
+        "I'd suggest tailoring your resume to highlight specific achievements. Would you like tips on that? 💡",
+        "There are several exciting opportunities in your field right now. Let me find the best matches! 🎯",
+      ];
+      setMessages(prev => [...prev, { role: 'ai', content: responses[Math.floor(Math.random() * responses.length)] }]);
+    }, 1500);
   };
 
   return (
@@ -86,6 +63,7 @@ export default function ChatWidget() {
           transition-all duration-300
           ${isOpen ? 'rotate-90' : 'animate-bounce-soft'}
         `}
+        style={{ color: '#fff' }}
       >
         {isOpen ? <FiX size={22} /> : <FiMessageCircle size={22} />}
       </motion.button>
@@ -98,19 +76,29 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed bottom-24 right-6 z-50 w-[380px] max-h-[520px] rounded-2xl overflow-hidden bg-navy-900/95 backdrop-blur-xl border border-white/[0.08] shadow-glass-lg flex flex-col"
+            className={`
+              fixed bottom-24 right-6 z-50 w-[380px] max-h-[520px] rounded-2xl overflow-hidden
+              backdrop-blur-xl flex flex-col
+              ${isDark
+                ? 'bg-navy-900/95 border border-white/[0.08] shadow-glass-lg'
+                : 'bg-white border border-gray-200 shadow-xl shadow-gray-300/30'
+              }
+            `}
           >
             {/* Header */}
-            <div className="p-4 border-b border-white/[0.06] bg-gradient-to-r from-accent-purple/10 to-accent-pink/5">
+            <div className={`
+              p-4 border-b bg-gradient-to-r from-accent-purple/10 to-accent-pink/5
+              ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}
+            `}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-purple to-accent-pink flex items-center justify-center">
-                  <FiCpu size={18} className="text-white" />
+                  <FiCpu size={18} className="text-white" style={{ color: '#fff' }} />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-sm">PulseBot AI</h3>
+                  <h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>PulseBot AI</h3>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-accent-neon animate-pulse" />
-                    <span className="text-xs text-white/40">Online</span>
+                    <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Online</span>
                   </div>
                 </div>
               </div>
@@ -134,9 +122,13 @@ export default function ChatWidget() {
                     max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed
                     ${msg.role === 'user'
                       ? 'bg-gradient-to-r from-accent-purple to-accent-purple-dark text-white rounded-br-md'
-                      : 'bg-white/[0.06] text-white/80 rounded-bl-md'
+                      : isDark
+                        ? 'bg-white/[0.06] text-white/80 rounded-bl-md'
+                        : 'bg-gray-100 text-gray-700 rounded-bl-md'
                     }
-                  `}>
+                  `}
+                  style={msg.role === 'user' ? { color: '#fff' } : {}}
+                  >
                     {msg.content}
                   </div>
                   {msg.role === 'user' && (
@@ -156,10 +148,10 @@ export default function ChatWidget() {
                   <div className="w-7 h-7 rounded-lg bg-accent-purple/20 flex items-center justify-center flex-shrink-0">
                     <FiCpu size={14} className="text-accent-purple" />
                   </div>
-                  <div className="bg-white/[0.06] rounded-2xl rounded-bl-md px-4 py-3 flex gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className={`rounded-2xl rounded-bl-md px-4 py-3 flex gap-1.5 ${isDark ? 'bg-white/[0.06]' : 'bg-gray-100'}`}>
+                    <span className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-white/30' : 'bg-gray-400'}`} style={{ animationDelay: '0ms' }} />
+                    <span className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-white/30' : 'bg-gray-400'}`} style={{ animationDelay: '150ms' }} />
+                    <span className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-white/30' : 'bg-gray-400'}`} style={{ animationDelay: '300ms' }} />
                   </div>
                 </motion.div>
               )}
@@ -176,7 +168,13 @@ export default function ChatWidget() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => sendMessage(action)}
-                    className="px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-xs text-white/60 hover:text-white hover:border-accent-purple/30 transition-all"
+                    className={`
+                      px-3 py-1.5 rounded-xl text-xs transition-all
+                      ${isDark
+                        ? 'bg-white/[0.05] border border-white/[0.08] text-white/60 hover:text-white hover:border-accent-purple/30'
+                        : 'bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-800 hover:border-accent-purple/30'
+                      }
+                    `}
                   >
                     {action}
                   </motion.button>
@@ -185,7 +183,7 @@ export default function ChatWidget() {
             )}
 
             {/* Input */}
-            <div className="p-3 border-t border-white/[0.06]">
+            <div className={`p-3 border-t ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}>
               <form
                 onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
                 className="flex gap-2"
@@ -201,6 +199,7 @@ export default function ChatWidget() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="p-3 rounded-xl bg-gradient-to-r from-accent-purple to-accent-purple-dark text-white hover:shadow-neon-purple transition-shadow"
+                  style={{ color: '#fff' }}
                 >
                   <FiSend size={16} />
                 </motion.button>

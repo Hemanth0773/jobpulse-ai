@@ -6,6 +6,7 @@ import {
   FiMessageCircle, FiSettings, FiChevronLeft, FiChevronRight,
   FiBarChart2, FiHeart
 } from 'react-icons/fi';
+import { useTheme } from '../../context/ThemeContext';
 
 const menuItems = [
   { path: '/dashboard', icon: FiGrid, label: 'Dashboard' },
@@ -23,6 +24,7 @@ const bottomItems = [
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { isDark } = useTheme();
 
   return (
     <motion.aside
@@ -32,8 +34,10 @@ export default function Sidebar() {
       className={`
         fixed left-0 top-20 bottom-0 z-40
         ${collapsed ? 'w-20' : 'w-64'}
-        bg-navy-900/50 backdrop-blur-xl
-        border-r border-white/[0.06]
+        ${isDark
+          ? 'bg-navy-900/50 backdrop-blur-xl border-r border-white/[0.06]'
+          : 'bg-white/90 backdrop-blur-xl border-r border-gray-200 shadow-lg shadow-gray-200/40'
+        }
         transition-all duration-300
         flex flex-col
         hidden lg:flex
@@ -42,13 +46,21 @@ export default function Sidebar() {
       {/* Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-navy-700 border border-white/[0.1] flex items-center justify-center text-white/50 hover:text-white hover:bg-navy-600 transition-all z-50"
+        className={`
+          absolute -right-3 top-6 w-6 h-6 rounded-full
+          flex items-center justify-center z-50
+          transition-all
+          ${isDark
+            ? 'bg-navy-700 border border-white/[0.1] text-white/50 hover:text-white hover:bg-navy-600'
+            : 'bg-white border border-gray-300 text-gray-500 hover:text-gray-800 hover:bg-gray-100 shadow-md'
+          }
+        `}
       >
         {collapsed ? <FiChevronRight size={12} /> : <FiChevronLeft size={12} />}
       </button>
 
       {/* Main Nav */}
-      <div className="flex-1 px-3 py-6 space-y-1">
+      <div className={`flex-1 px-3 py-6 space-y-1`}>
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -60,15 +72,17 @@ export default function Sidebar() {
                 relative flex items-center gap-3 px-3 py-3 rounded-xl
                 transition-all duration-300 group
                 ${isActive
-                  ? 'text-white'
-                  : 'text-white/40 hover:text-white/80 hover:bg-white/[0.04]'
+                  ? isDark ? 'text-white' : 'text-gray-900'
+                  : isDark
+                    ? 'text-white/40 hover:text-white/80 hover:bg-white/[0.04]'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
                 }
               `}
             >
               {isActive && (
                 <motion.div
                   layoutId="sidebarActive"
-                  className="absolute inset-0 bg-gradient-to-r from-accent-purple/15 to-transparent rounded-xl border-l-2 border-accent-purple"
+                  className={`absolute inset-0 rounded-xl border-l-2 border-accent-purple ${isDark ? 'bg-gradient-to-r from-accent-purple/15 to-transparent' : 'bg-blue-50'}`}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 />
               )}
@@ -91,7 +105,7 @@ export default function Sidebar() {
       </div>
 
       {/* Bottom Nav */}
-      <div className="px-3 py-4 space-y-1 border-t border-white/[0.06]">
+      <div className={`px-3 py-4 space-y-1 border-t ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}>
         {bottomItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -103,8 +117,10 @@ export default function Sidebar() {
                 flex items-center gap-3 px-3 py-3 rounded-xl
                 transition-all duration-300 group
                 ${isActive
-                  ? 'text-white bg-white/[0.06]'
-                  : 'text-white/40 hover:text-white/80 hover:bg-white/[0.04]'
+                  ? isDark ? 'text-white bg-white/[0.06]' : 'text-gray-900 bg-blue-50'
+                  : isDark
+                    ? 'text-white/40 hover:text-white/80 hover:bg-white/[0.04]'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
                 }
               `}
             >

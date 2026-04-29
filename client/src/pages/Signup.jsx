@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiBriefcase } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -17,6 +18,7 @@ export default function Signup() {
   const captchaB = useRef(Math.floor(Math.random() * 10) + 1).current;
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const { register, loginWithGoogle } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -79,8 +81,8 @@ export default function Signup() {
                 JobPulse<span className="text-accent-neon">AI</span>
               </span>
             </Link>
-            <h1 className="text-2xl font-bold font-display text-white mb-2">Create Account</h1>
-            <p className="text-white/40 text-sm">Start your AI-powered career journey</p>
+            <h1 className={`text-2xl font-bold font-display mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Create Account</h1>
+            <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Start your AI-powered career journey</p>
           </div>
 
           <motion.button
@@ -88,16 +90,20 @@ export default function Signup() {
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleSignup}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 p-3.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/80 font-medium text-sm hover:bg-white/[0.1] transition-all mb-6 disabled:opacity-50"
+            className={`w-full flex items-center justify-center gap-3 p-3.5 rounded-xl font-medium text-sm transition-all mb-6 disabled:opacity-50 ${
+              isDark 
+                ? 'bg-white/[0.06] border border-white/[0.08] text-white/80 hover:bg-white/[0.1]' 
+                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm'
+            }`}
           >
             <FcGoogle size={20} />
             Continue with Google
           </motion.button>
 
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-white/[0.06]" />
-            <span className="text-xs text-white/30">or register with email</span>
-            <div className="flex-1 h-px bg-white/[0.06]" />
+            <div className={`flex-1 h-px ${isDark ? 'bg-white/[0.06]' : 'bg-gray-200'}`} />
+            <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>or register with email</span>
+            <div className={`flex-1 h-px ${isDark ? 'bg-white/[0.06]' : 'bg-gray-200'}`} />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,9 +118,9 @@ export default function Signup() {
             )}
 
             <div>
-              <label className="text-sm text-white/50 mb-1.5 block">Full Name</label>
+              <label className={`text-sm mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-600'}`}>Full Name</label>
               <div className="relative">
-                <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                <FiUser className={`absolute left-4 top-1/2 -translate-y-1/2 ${isDark ? 'text-white/30' : 'text-gray-400'}`} size={16} />
                 <input
                   type="text"
                   value={name}
@@ -127,9 +133,9 @@ export default function Signup() {
             </div>
 
             <div>
-              <label className="text-sm text-white/50 mb-1.5 block">Email</label>
+              <label className={`text-sm mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-600'}`}>Email</label>
               <div className="relative">
-                <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                <FiMail className={`absolute left-4 top-1/2 -translate-y-1/2 ${isDark ? 'text-white/30' : 'text-gray-400'}`} size={16} />
                 <input
                   type="email"
                   value={email}
@@ -142,9 +148,9 @@ export default function Signup() {
             </div>
 
             <div>
-              <label className="text-sm text-white/50 mb-1.5 block">Password</label>
+              <label className={`text-sm mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-600'}`}>Password</label>
               <div className="relative">
-                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                <FiLock className={`absolute left-4 top-1/2 -translate-y-1/2 ${isDark ? 'text-white/30' : 'text-gray-400'}`} size={16} />
                 <input
                   type={showPass ? 'text' : 'password'}
                   value={password}
@@ -156,7 +162,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+                  className={`absolute right-4 top-1/2 -translate-y-1/2 ${isDark ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   {showPass ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
@@ -165,7 +171,7 @@ export default function Signup() {
 
             {/* Role Select */}
             <div>
-              <label className="text-sm text-white/50 mb-1.5 block">I am a</label>
+              <label className={`text-sm mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-600'}`}>I am a</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { value: 'jobseeker', label: 'Job Seeker', icon: <FiUser size={16} /> },
@@ -179,7 +185,9 @@ export default function Signup() {
                       flex items-center justify-center gap-2 p-3 rounded-xl text-sm font-medium transition-all
                       ${role === r.value
                         ? 'bg-accent-purple/20 border border-accent-purple/40 text-accent-purple-light'
-                        : 'bg-white/[0.04] border border-white/[0.06] text-white/50 hover:text-white/70 hover:bg-white/[0.06]'
+                        : isDark
+                          ? 'bg-white/[0.04] border border-white/[0.06] text-white/50 hover:text-white/70 hover:bg-white/[0.06]'
+                          : 'bg-white border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-50 shadow-sm'
                       }
                     `}
                   >
@@ -191,7 +199,7 @@ export default function Signup() {
 
             {/* CAPTCHA */}
             <div>
-              <label className="text-sm text-white/50 mb-1.5 block">
+              <label className={`text-sm mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
                 What is {captchaA} + {captchaB}?
               </label>
               <input
@@ -210,6 +218,7 @@ export default function Signup() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="btn-glow w-full py-4 flex items-center justify-center gap-2 text-base disabled:opacity-50"
+              style={{ color: '#fff' }}
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -222,7 +231,7 @@ export default function Signup() {
             </motion.button>
           </form>
 
-          <p className="text-center text-sm text-white/40 mt-6">
+          <p className={`text-center text-sm mt-6 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
             Already have an account?{' '}
             <Link to="/login" className="text-accent-purple-light hover:text-accent-purple transition-colors font-medium">
               Sign In

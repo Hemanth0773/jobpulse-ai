@@ -3,9 +3,7 @@ import { motion } from 'framer-motion';
 import { FiSend, FiCpu, FiUser, FiArrowLeft, FiZap } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
-import { io } from 'socket.io-client';
-
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { useTheme } from '../context/ThemeContext';
 
 const modes = [
   { id: 'career', label: '💡 Career Advice', desc: 'Get personalized career guidance' },
@@ -23,27 +21,7 @@ export default function ChatbotPage() {
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
   const messagesEndRef = useRef(null);
-  const socketRef = useRef(null);
-
-  useEffect(() => {
-    socketRef.current = io(SOCKET_URL);
-
-    socketRef.current.on('chat:response', (data) => {
-      setMessages(prev => [...prev, { role: 'ai', content: data.content }]);
-    });
-
-    socketRef.current.on('chat:typing', (isTyping) => {
-      setTyping(isTyping);
-    });
-
-    socketRef.current.on('chat:error', (error) => {
-      setMessages(prev => [...prev, { role: 'ai', content: "Sorry, I'm having trouble connecting right now. 😔" }]);
-    });
-
-    return () => {
-      if (socketRef.current) socketRef.current.disconnect();
-    };
-  }, []);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,9 +30,19 @@ export default function ChatbotPage() {
   const selectMode = (mode) => {
     setSelectedMode(mode.id);
     setMessages(prev => [...prev, { role: 'user', content: mode.label }]);
-    if (socketRef.current) {
-      socketRef.current.emit('chat:message', { message: `I selected ${mode.label}. What can you help me with?`, mode: mode.id });
-    }
+
+    // Mock AI response
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+      const responses = {
+        career: "Great choice! I'm ready to help with career guidance. What's on your mind? 🎯",
+        jobs: "Let's find you the perfect job! Tell me about your skills and experience. 🔍",
+        team: "Team building mode activated! Describe your project and I'll suggest the ideal team. 👥",
+        interview: "Interview prep mode! What role are you preparing for? I'll help you ace it. 🎯",
+      };
+      setMessages(prev => [...prev, { role: 'ai', content: responses[mode.id] }]);
+    }, 1200);
   };
 
   const sendMessage = () => {
@@ -62,10 +50,19 @@ export default function ChatbotPage() {
     const msg = input.trim();
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setInput('');
-    
-    if (socketRef.current) {
-      socketRef.current.emit('chat:message', { message: msg, mode: selectedMode || 'general' });
-    }
+
+    // Mock AI response
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+      const responses = [
+        "That's a great question! Based on current industry trends, I'd recommend focusing on cloud computing and AI/ML skills. 📈",
+        "I can definitely help with that. Here are some key points to consider for your career path... 💡",
+        "Interesting! Let me analyze that and give you some tailored recommendations. 🔍",
+        "Based on your background, I'd suggest exploring roles in full-stack development or data engineering. These fields are growing rapidly! 🚀",
+      ];
+      setMessages(prev => [...prev, { role: 'ai', content: responses[Math.floor(Math.random() * responses.length)] }]);
+    }, 1500);
   };
 
   return (
@@ -73,18 +70,24 @@ export default function ChatbotPage() {
       <Sidebar />
       <main className="lg:pl-64 flex-1 transition-all duration-300 flex flex-col max-h-screen pt-20 fixed inset-0">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/[0.06] bg-navy-900/50 backdrop-blur-xl flex items-center gap-4 lg:pl-70">
-          <Link to="/dashboard" className="lg:hidden p-2 rounded-lg hover:bg-white/[0.05]">
-            <FiArrowLeft size={20} className="text-white/60" />
+        <div className={`
+          px-6 py-4 border-b backdrop-blur-xl flex items-center gap-4 lg:pl-70
+          ${isDark
+            ? 'border-white/[0.06] bg-navy-900/50'
+            : 'border-gray-200 bg-white/80'
+          }
+        `}>
+          <Link to="/dashboard" className={`lg:hidden p-2 rounded-lg ${isDark ? 'hover:bg-white/[0.05]' : 'hover:bg-gray-100'}`}>
+            <FiArrowLeft size={20} className={isDark ? 'text-white/60' : 'text-gray-500'} />
           </Link>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-purple to-accent-pink flex items-center justify-center">
-            <FiCpu size={18} className="text-white" />
+            <FiCpu size={18} className="text-white" style={{ color: '#fff' }} />
           </div>
           <div>
-            <h1 className="text-white font-semibold">PulseBot AI</h1>
+            <h1 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>PulseBot AI</h1>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-accent-neon animate-pulse" />
-              <span className="text-xs text-white/40">Online • Powered by AI</span>
+              <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Online • Powered by AI</span>
             </div>
           </div>
           <div className="ml-auto">
@@ -115,11 +118,15 @@ export default function ChatbotPage() {
                 max-w-[80%] rounded-2xl px-5 py-3.5 text-sm leading-relaxed whitespace-pre-line
                 ${msg.role === 'user'
                   ? 'bg-gradient-to-r from-accent-purple to-accent-purple-dark text-white rounded-br-md'
-                  : 'bg-white/[0.05] text-white/80 rounded-bl-md border border-white/[0.06]'
+                  : isDark
+                    ? 'bg-white/[0.05] text-white/80 rounded-bl-md border border-white/[0.06]'
+                    : 'bg-gray-100 text-gray-700 rounded-bl-md border border-gray-200'
                 }
-              `}>
+              `}
+              style={msg.role === 'user' ? { color: '#fff' } : {}}
+              >
                 {msg.content.split('**').map((part, j) =>
-                  j % 2 === 0 ? part : <strong key={j} className="text-white font-semibold">{part}</strong>
+                  j % 2 === 0 ? part : <strong key={j} className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{part}</strong>
                 )}
               </div>
             </motion.div>
@@ -130,10 +137,10 @@ export default function ChatbotPage() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-purple/20 to-accent-pink/10 flex items-center justify-center">
                 <FiCpu size={16} className="text-accent-purple" />
               </div>
-              <div className="bg-white/[0.05] rounded-2xl rounded-bl-md px-5 py-4 flex gap-1.5 border border-white/[0.06]">
-                <span className="w-2 h-2 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className={`rounded-2xl rounded-bl-md px-5 py-4 flex gap-1.5 border ${isDark ? 'bg-white/[0.05] border-white/[0.06]' : 'bg-gray-100 border-gray-200'}`}>
+                <span className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-white/30' : 'bg-gray-400'}`} style={{ animationDelay: '0ms' }} />
+                <span className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-white/30' : 'bg-gray-400'}`} style={{ animationDelay: '150ms' }} />
+                <span className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-white/30' : 'bg-gray-400'}`} style={{ animationDelay: '300ms' }} />
               </div>
             </motion.div>
           )}
@@ -151,10 +158,16 @@ export default function ChatbotPage() {
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => selectMode(mode)}
-                  className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:border-accent-purple/30 hover:bg-white/[0.06] transition-all text-left"
+                  className={`
+                    p-4 rounded-xl transition-all text-left
+                    ${isDark
+                      ? 'bg-white/[0.04] border border-white/[0.06] hover:border-accent-purple/30 hover:bg-white/[0.06]'
+                      : 'bg-white border border-gray-200 hover:border-accent-purple/30 hover:bg-gray-50 shadow-sm'
+                    }
+                  `}
                 >
                   <div className="text-xl mb-2">{mode.label.split(' ')[0]}</div>
-                  <p className="text-xs text-white/40">{mode.desc}</p>
+                  <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{mode.desc}</p>
                 </motion.button>
               ))}
             </div>
@@ -162,7 +175,13 @@ export default function ChatbotPage() {
         )}
 
         {/* Input */}
-        <div className="px-6 py-4 border-t border-white/[0.06] bg-navy-900/50 backdrop-blur-xl lg:pl-70">
+        <div className={`
+          px-6 py-4 border-t backdrop-blur-xl lg:pl-70
+          ${isDark
+            ? 'border-white/[0.06] bg-navy-900/50'
+            : 'border-gray-200 bg-white/80'
+          }
+        `}>
           <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="max-w-3xl flex gap-3">
             <input
               value={input}
@@ -175,6 +194,7 @@ export default function ChatbotPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="p-3.5 rounded-xl bg-gradient-to-r from-accent-purple to-accent-purple-dark text-white hover:shadow-neon-purple transition-shadow"
+              style={{ color: '#fff' }}
             >
               <FiSend size={18} />
             </motion.button>

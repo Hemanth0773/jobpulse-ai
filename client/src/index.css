@@ -344,7 +344,7 @@
 
 .light .input-glass {
   background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.12);
   color: #1a1a2e;
 }
 
@@ -416,7 +416,7 @@
   color: #1a1a2e;
 }
 
-/* Light mode text overrides — make white text dark */
+/* ---- Text color overrides ---- */
 .light .text-white {
   color: #1a1a2e !important;
 }
@@ -433,20 +433,23 @@
   color: rgba(26, 26, 46, 0.7) !important;
 }
 
-/* Borders */
+/* ---- Border overrides ---- */
 .light .border-white\/\[0\.06\],
 .light .border-white\/\[0\.08\],
 .light .border-white\/\[0\.1\] {
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Backgrounds */
+/* ---- Background overrides ---- */
+.light .bg-white\/\[0\.02\],
+.light .bg-white\/\[0\.03\],
 .light .bg-white\/\[0\.04\],
-.light .bg-white\/\[0\.05\],
-.light .bg-white\/\[0\.03\] {
-  background-color: rgba(0, 0, 0, 0.03) !important;
+.light .bg-white\/\[0\.05\] {
+  background-color: rgba(0, 0, 0, 0.025) !important;
 }
 
+.light .bg-white\/\[0\.06\],
+.light .bg-white\/\[0\.07\],
 .light .bg-white\/\[0\.08\],
 .light .bg-white\/5,
 .light .bg-white\/10 {
@@ -458,23 +461,88 @@
   color: #10B981 !important;
 }
 
-/* Sidebar */
-.light .bg-navy-900\/95,
-.light .bg-navy-900\/80 {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.light .bg-navy-950 {
+/* ---- Navy background overrides (Sidebar, Footer, Chatbot) ---- */
+.light .bg-navy-950,
+.light .bg-navy-950\/80 {
   background-color: #F5F7FB !important;
 }
 
-/* Hover states */
+.light .bg-navy-900,
+.light .bg-navy-900\/50,
+.light .bg-navy-900\/80,
+.light .bg-navy-900\/95 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.light .bg-navy-800 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.light .bg-navy-700 {
+  background-color: #e2e8f0 !important;
+}
+
+.light .bg-navy-600 {
+  background-color: #cbd5e1 !important;
+}
+
+/* ---- Hover states ---- */
+.light .hover\:bg-white\/\[0\.04\]:hover,
 .light .hover\:bg-white\/\[0\.05\]:hover,
 .light .hover\:bg-white\/\[0\.03\]:hover {
   background-color: rgba(0, 0, 0, 0.05) !important;
 }
 
-.light .hover\:bg-white\/\[0\.08\]:hover {
+.light .hover\:bg-white\/\[0\.06\]:hover,
+.light .hover\:bg-white\/\[0\.08\]:hover,
+.light .hover\:bg-white\/\[0\.1\]:hover,
+.light .hover\:bg-white\/\[0\.10\]:hover {
   background-color: rgba(0, 0, 0, 0.06) !important;
 }
+
+.light .hover\:bg-white\/\[0\.20\]:hover,
+.light .hover\:bg-white\/20:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ---- Sidebar specific ---- */
+.light .hover\:bg-navy-600:hover {
+  background-color: #cbd5e1 !important;
+}
+
+/* ---- Chat bubbles (AI) ---- */
+.light .bg-white\/\[0\.06\] {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ---- Accent backgrounds with alpha (purple/10, pink/20 etc.) ---- */
+.light .bg-accent-purple\/10,
+.light .bg-accent-purple\/20 {
+  background-color: rgba(79, 156, 249, 0.1) !important;
+}
+
+.light .bg-accent-pink\/20 {
+  background-color: rgba(244, 114, 182, 0.1) !important;
+}
+
+/* ---- Shadow overrides ---- */
+.light .shadow-glass {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .shadow-glass-lg {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ---- Gradient overlay in footer ---- */
+.light .from-accent-purple\/10,
+.light .to-accent-pink\/5 {
+  /* Let gradients remain but softer */
+}
+
+/* ---- Mobile menu ---- */
+.light .bg-navy-900\/95 {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+}
+
 

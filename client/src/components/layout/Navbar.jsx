@@ -104,7 +104,7 @@ export default function Navbar() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-white/[0.05] text-white/60 hover:text-white hover:bg-white/[0.08] transition-all relative overflow-hidden"
+              className={`p-2.5 rounded-xl transition-all relative overflow-hidden ${isDark ? 'bg-white/[0.05] text-white/60 hover:text-white hover:bg-white/[0.08]' : 'bg-gray-100 text-gray-500 hover:text-gray-800 hover:bg-gray-200'}`}
             >
               <motion.div
                 key={isDark ? 'moon' : 'sun'}
@@ -123,7 +123,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
-                className="p-2.5 rounded-xl bg-white/[0.05] text-white/60 hover:text-white hover:bg-white/[0.08] transition-all relative"
+                className={`p-2.5 rounded-xl transition-all relative ${isDark ? 'bg-white/[0.05] text-white/60 hover:text-white hover:bg-white/[0.08]' : 'bg-gray-100 text-gray-500 hover:text-gray-800 hover:bg-gray-200'}`}
               >
                 <FiBell size={18} />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent-neon rounded-full animate-pulse" />
@@ -159,7 +159,7 @@ export default function Navbar() {
                   onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}
                   className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] transition-all"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-purple to-accent-pink flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-purple to-accent-pink flex items-center justify-center text-sm font-bold" style={{ color: '#fff' }}>
                     {user.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <span className="text-sm text-white/70 font-medium">{user.name?.split(' ')[0] || 'User'}</span>
@@ -218,7 +218,7 @@ export default function Navbar() {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2.5 rounded-xl bg-white/[0.05] text-white"
+            className={`lg:hidden p-2.5 rounded-xl ${isDark ? 'bg-white/[0.05] text-white' : 'bg-gray-100 text-gray-700'}`}
           >
             {mobileOpen ? <FiX size={20} /> : <FiMenu size={20} />}
           </motion.button>
@@ -232,7 +232,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t border-white/[0.06] bg-navy-900/95 backdrop-blur-xl"
+            className={`lg:hidden border-t backdrop-blur-xl ${isDark ? 'border-white/[0.06] bg-navy-900/95' : 'border-gray-200 bg-white/95'}`}
           >
             <div className="p-4 space-y-2">
               {navLinks.map((link) => (
@@ -241,17 +241,17 @@ export default function Navbar() {
                   to={link.path}
                   className={`block px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     location.pathname === link.path
-                      ? 'bg-white/[0.08] text-white'
-                      : 'text-white/50 hover:text-white hover:bg-white/[0.05]'
+                      ? isDark ? 'bg-white/[0.08] text-white' : 'bg-blue-50 text-gray-900'
+                      : isDark ? 'text-white/50 hover:text-white hover:bg-white/[0.05]' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-2 border-t border-white/[0.06] space-y-2">
+              <div className={`pt-2 border-t space-y-2 ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}>
                 {!user ? (
                   <>
-                    <Link to="/login" className="block px-4 py-3 text-sm text-white/70 hover:text-white">Sign In</Link>
+                    <Link to="/login" className={`block px-4 py-3 text-sm ${isDark ? 'text-white/70 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>Sign In</Link>
                     <Link to="/signup" className="block"><button className="btn-glow w-full text-sm">Get Started</button></Link>
                   </>
                 ) : (
