@@ -5,6 +5,63 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toggleBookmark } from '../../services/firestore';
 
+// Map company names to their actual domains for accurate favicon fetching
+const COMPANY_DOMAINS = {
+  'google': 'google.com',
+  'openai': 'openai.com',
+  'netflix': 'netflix.com',
+  'figma': 'figma.com',
+  'aws': 'aws.amazon.com',
+  'meta': 'meta.com',
+  'spotify': 'spotify.com',
+  'apple': 'apple.com',
+  'microsoft': 'microsoft.com',
+  'deepmind': 'deepmind.google',
+  'vercel': 'vercel.com',
+  'crowdstrike': 'crowdstrike.com',
+  'stripe': 'stripe.com',
+  'samsung': 'samsung.com',
+  'coinbase': 'coinbase.com',
+};
+
+function CompanyLogo({ company, colorClass }) {
+  const [showFallback, setShowFallback] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const companyKey = (company || '').toLowerCase().replace(/\s+/g, '');
+  const domain = COMPANY_DOMAINS[companyKey] || `${companyKey}.com`;
+  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+
+  if (showFallback) {
+    return (
+      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-lg shadow-lg flex-shrink-0`}>
+        {company?.charAt(0) || 'C'}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
+      <img
+        src={logoUrl}
+        alt={company}
+        className={`w-9 h-9 object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={(e) => {
+          // Google returns a 16x16 default globe if domain has no favicon — reject those
+          if (e.target.naturalWidth <= 16) {
+            setShowFallback(true);
+          } else {
+            setLoaded(true);
+          }
+        }}
+        onError={() => setShowFallback(true)}
+      />
+      {!loaded && !showFallback && (
+        <span className="absolute text-white font-bold text-lg">{company?.charAt(0) || 'C'}</span>
+      )}
+    </div>
+  );
+}
+
 export default function JobCard({ job, delay = 0, isBookmarked = false }) {
   const [bookmarked, setBookmarked] = useState(isBookmarked);
   const [saving, setSaving] = useState(false);
@@ -72,15 +129,23 @@ export default function JobCard({ job, delay = 0, isBookmarked = false }) {
       <div className="relative z-10 p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${companyColors[colorIndex]} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
-            {job?.company?.charAt(0) || 'C'}
+          <div className="flex items-center gap-3">
+            <CompanyLogo company={job?.company} colorClass={companyColors[colorIndex]} />
+            <div className="flex flex-col">
+              <h3 className="text-base font-semibold text-white group-hover:text-accent-purple-light transition-colors duration-300 leading-tight">
+                {job?.title || 'Software Engineer'}
+              </h3>
+              <p className="text-accent-purple-light/70 text-sm font-medium mt-0.5">
+                {job?.company || 'Tech Corp'}
+              </p>
+            </div>
           </div>
           <motion.button
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleBookmark}
             disabled={saving}
-            className={`p-2 rounded-lg transition-all duration-300 ${
+            className={`p-2 rounded-lg transition-all duration-300 flex-shrink-0 ${
               bookmarked
                 ? 'bg-accent-purple/20 text-accent-purple'
                 : 'bg-white/5 text-white/30 hover:text-white/60 hover:bg-white/10'
@@ -89,12 +154,6 @@ export default function JobCard({ job, delay = 0, isBookmarked = false }) {
             <FiBookmark className={bookmarked ? 'fill-current' : ''} size={18} />
           </motion.button>
         </div>
-
-        {/* Job Info */}
-        <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-accent-purple-light transition-colors duration-300">
-          {job?.title || 'Software Engineer'}
-        </h3>
-        <p className="text-white/50 text-sm font-medium mb-3">{job?.company || 'Tech Corp'}</p>
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-4">

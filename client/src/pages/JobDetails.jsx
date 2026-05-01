@@ -8,6 +8,62 @@ import Footer from '../components/layout/Footer';
 import { getJobById, applyToJob, toggleBookmark, getUserProfile } from '../services/firestore';
 import { useAuth } from '../context/AuthContext';
 
+// Map company names to their actual domains for accurate favicon fetching
+const COMPANY_DOMAINS = {
+  'google': 'google.com',
+  'openai': 'openai.com',
+  'netflix': 'netflix.com',
+  'figma': 'figma.com',
+  'aws': 'aws.amazon.com',
+  'meta': 'meta.com',
+  'spotify': 'spotify.com',
+  'apple': 'apple.com',
+  'microsoft': 'microsoft.com',
+  'deepmind': 'deepmind.google',
+  'vercel': 'vercel.com',
+  'crowdstrike': 'crowdstrike.com',
+  'stripe': 'stripe.com',
+  'samsung': 'samsung.com',
+  'coinbase': 'coinbase.com',
+};
+
+function DetailCompanyLogo({ company, colorClass }) {
+  const [showFallback, setShowFallback] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const companyKey = (company || '').toLowerCase().replace(/\s+/g, '');
+  const domain = COMPANY_DOMAINS[companyKey] || `${companyKey}.com`;
+  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+
+  if (showFallback) {
+    return (
+      <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-2xl sm:text-3xl shadow-lg flex-shrink-0`}>
+        {company?.charAt(0) || 'C'}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0 relative">
+      <img
+        src={logoUrl}
+        alt={company}
+        className={`w-12 h-12 sm:w-14 sm:h-14 object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={(e) => {
+          if (e.target.naturalWidth <= 16) {
+            setShowFallback(true);
+          } else {
+            setLoaded(true);
+          }
+        }}
+        onError={() => setShowFallback(true)}
+      />
+      {!loaded && !showFallback && (
+        <span className="absolute text-white font-bold text-2xl sm:text-3xl">{company?.charAt(0) || 'C'}</span>
+      )}
+    </div>
+  );
+}
+
 // Fallback job data matching our IDs
 const fallbackJobs = {
   'job_1': {
@@ -197,9 +253,7 @@ export default function JobDetails() {
           <GlassCard hover={false} className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-start gap-6">
               {/* Company Logo */}
-              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${companyColors[colorIndex]} flex items-center justify-center text-white font-bold text-2xl sm:text-3xl shadow-lg flex-shrink-0`}>
-                {job.company?.charAt(0)}
-              </div>
+              <DetailCompanyLogo company={job.company} colorClass={companyColors[colorIndex]} />
 
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl sm:text-3xl font-bold font-display text-white mb-2">{job.title}</h1>
