@@ -31,18 +31,21 @@ export default function ChatWidget() {
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setInput('');
 
-    // Mock AI response
     setTyping(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await response.json();
+      setMessages(prev => [...prev, { role: 'ai', content: data.reply || "Sorry, something went wrong. Try again." }]);
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => [...prev, { role: 'ai', content: "Sorry, something went wrong. Try again." }]);
+    } finally {
       setTyping(false);
-      const responses = [
-        "I can help you with that! Let me look into some options for you. 🔍",
-        "Great question! Based on current trends, I'd recommend focusing on skills like React, Python, and cloud computing. 📈",
-        "I'd suggest tailoring your resume to highlight specific achievements. Would you like tips on that? 💡",
-        "There are several exciting opportunities in your field right now. Let me find the best matches! 🎯",
-      ];
-      setMessages(prev => [...prev, { role: 'ai', content: responses[Math.floor(Math.random() * responses.length)] }]);
-    }, 1500);
+    }
   };
 
   return (

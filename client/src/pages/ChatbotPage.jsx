@@ -27,42 +27,43 @@ export default function ChatbotPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const selectMode = (mode) => {
+  const fetchAIResponse = async (text, mode = null) => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: text, mode }),
+      });
+      const data = await response.json();
+      return data.reply || "Sorry, something went wrong. Try again.";
+    } catch (error) {
+      console.error(error);
+      return "Sorry, something went wrong. Try again.";
+    }
+  };
+
+  const selectMode = async (mode) => {
     setSelectedMode(mode.id);
     setMessages(prev => [...prev, { role: 'user', content: mode.label }]);
 
-    // Mock AI response
     setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      const responses = {
-        career: "Great choice! I'm ready to help with career guidance. What's on your mind? 🎯",
-        jobs: "Let's find you the perfect job! Tell me about your skills and experience. 🔍",
-        team: "Team building mode activated! Describe your project and I'll suggest the ideal team. 👥",
-        interview: "Interview prep mode! What role are you preparing for? I'll help you ace it. 🎯",
-      };
-      setMessages(prev => [...prev, { role: 'ai', content: responses[mode.id] }]);
-    }, 1200);
+    const reply = await fetchAIResponse(mode.label, mode.id);
+    setTyping(false);
+    setMessages(prev => [...prev, { role: 'ai', content: reply }]);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
     const msg = input.trim();
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setInput('');
 
-    // Mock AI response
     setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      const responses = [
-        "That's a great question! Based on current industry trends, I'd recommend focusing on cloud computing and AI/ML skills. 📈",
-        "I can definitely help with that. Here are some key points to consider for your career path... 💡",
-        "Interesting! Let me analyze that and give you some tailored recommendations. 🔍",
-        "Based on your background, I'd suggest exploring roles in full-stack development or data engineering. These fields are growing rapidly! 🚀",
-      ];
-      setMessages(prev => [...prev, { role: 'ai', content: responses[Math.floor(Math.random() * responses.length)] }]);
-    }, 1500);
+    const reply = await fetchAIResponse(msg, selectedMode);
+    setTyping(false);
+    setMessages(prev => [...prev, { role: 'ai', content: reply }]);
   };
 
   return (
