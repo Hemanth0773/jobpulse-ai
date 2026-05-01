@@ -5,7 +5,7 @@ import { FiMapPin, FiClock, FiCalendar, FiArrowLeft, FiBookmark, FiShare2, FiChe
 import GlassCard from '../components/ui/GlassCard';
 import AnimatedSection from '../components/animations/AnimatedSection';
 import Footer from '../components/layout/Footer';
-import { getJobById, applyToJob } from '../services/firestore';
+import { getJobById, applyToJob, toggleBookmark, getUserProfile } from '../services/firestore';
 import { useAuth } from '../context/AuthContext';
 
 // Fallback job data matching our IDs
@@ -96,10 +96,12 @@ export default function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [applied, setApplied] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkSaving, setBookmarkSaving] = useState(false);
 
   useEffect(() => {
     fetchJob();
-  }, [id]);
+    if (user?.uid) checkBookmarkStatus();
+  }, [id, user?.uid]);
 
   const fetchJob = async () => {
     setLoading(true);
@@ -131,6 +133,32 @@ export default function JobDetails() {
       } else {
         alert(err.message);
       }
+    }
+  };
+
+  const checkBookmarkStatus = async () => {
+    try {
+      const profile = await getUserProfile(user.uid);
+      if (profile?.bookmarkedJobs?.includes(id)) {
+        setBookmarked(true);
+      }
+    } catch { /* ignore */ }
+  };
+
+  const handleBookmark = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (bookmarkSaving) return;
+    setBookmarkSaving(true);
+    try {
+      const updatedBookmarks = await toggleBookmark(user.uid, id);
+      setBookmarked(updatedBookmarks.includes(id));
+    } catch (err) {
+      console.error('Bookmark error:', err);
+    } finally {
+      setBookmarkSaving(false);
     }
   };
 
@@ -195,7 +223,8 @@ export default function JobDetails() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setBookmarked(!bookmarked)}
+                  onClick={handleBookmark}
+                  disabled={bookmarkSaving}
                   className={`p-3 rounded-xl transition-all ${bookmarked ? 'bg-accent-purple/20 text-accent-purple' : 'bg-white/[0.05] text-white/40 hover:text-white/70'}`}
                 >
                   <FiBookmark className={bookmarked ? 'fill-current' : ''} size={20} />
@@ -367,7 +396,8 @@ export default function JobDetails() {
               </motion.div>
             )}
             <button
-              onClick={() => setBookmarked(!bookmarked)}
+              onClick={handleBookmark}
+              disabled={bookmarkSaving}
               className={`px-8 py-4 rounded-xl border text-sm font-semibold transition-all w-full sm:w-auto flex items-center justify-center gap-2 ${
                 bookmarked
                   ? 'bg-accent-purple/10 border-accent-purple/30 text-accent-purple'

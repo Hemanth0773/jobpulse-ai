@@ -5,7 +5,8 @@ import { useSearchParams } from 'react-router-dom';
 import JobCard from '../components/cards/JobCard';
 import AnimatedSection from '../components/animations/AnimatedSection';
 import Footer from '../components/layout/Footer';
-import { getJobs } from '../services/firestore';
+import { getJobs, getUserProfile } from '../services/firestore';
+import { useAuth } from '../context/AuthContext';
 
 // Fallback data so jobs page never shows empty
 const fallbackJobs = [
@@ -36,12 +37,15 @@ export default function JobListings() {
   const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'All');
   const [showFilters, setShowFilters] = useState(!!searchParams.get('domain') || !!searchParams.get('type'));
   const [allJobs, setAllJobs] = useState(fallbackJobs);
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   // Fetch from backend, fallback to local data
   useEffect(() => {
     fetchJobs();
-  }, []);
+    if (user?.uid) fetchBookmarks();
+  }, [user?.uid]);
 
   // Sync domain from URL query params
   useEffect(() => {
@@ -65,6 +69,13 @@ export default function JobListings() {
       }
     } catch { /* use fallback */ }
     setLoading(false);
+  };
+
+  const fetchBookmarks = async () => {
+    try {
+      const profile = await getUserProfile(user.uid);
+      setBookmarkedIds(profile?.bookmarkedJobs || []);
+    } catch { /* ignore */ }
   };
 
   const filtered = useMemo(() => {
@@ -240,7 +251,7 @@ export default function JobListings() {
         ) : filtered.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((job, i) => (
-              <JobCard key={job._id} job={job} delay={i * 0.05} />
+              <JobCard key={job._id} job={job} delay={i * 0.05} isBookmarked={bookmarkedIds.includes(job._id || job.id)} />
             ))}
           </div>
         ) : (

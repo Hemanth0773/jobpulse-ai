@@ -2,20 +2,38 @@ import { motion } from 'framer-motion';
 import { FiBookmark, FiMapPin, FiClock, FiArrowRight } from 'react-icons/fi';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { toggleBookmark } from '../../services/firestore';
 
-export default function JobCard({ job, delay = 0, onBookmark }) {
-  const [bookmarked, setBookmarked] = useState(job?.bookmarked || false);
+export default function JobCard({ job, delay = 0, isBookmarked = false }) {
+  const [bookmarked, setBookmarked] = useState(isBookmarked);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const handleBookmark = (e) => {
+  const handleBookmark = async (e) => {
     e.stopPropagation();
-    setBookmarked(!bookmarked);
-    onBookmark?.(job?._id);
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (saving) return;
+
+    setSaving(true);
+    try {
+      const jobId = job?._id || job?.id;
+      const updatedBookmarks = await toggleBookmark(user.uid, jobId);
+      setBookmarked(updatedBookmarks.includes(jobId));
+    } catch (err) {
+      console.error('Bookmark error:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleViewDetails = (e) => {
     e.stopPropagation();
-    navigate(`/jobs/${job?._id}`);
+    navigate(`/jobs/${job?._id || job?.id}`);
   };
 
   const companyColors = [
@@ -35,7 +53,7 @@ export default function JobCard({ job, delay = 0, onBookmark }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileHover={{ y: -8, scale: 1.02 }}
-      onClick={() => navigate(`/jobs/${job?._id}`)}
+      onClick={() => navigate(`/jobs/${job?._id || job?.id}`)}
       className="
         relative group rounded-2xl overflow-hidden
         bg-white/[0.04] dark:bg-white/[0.04] backdrop-blur-xl
@@ -61,11 +79,12 @@ export default function JobCard({ job, delay = 0, onBookmark }) {
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleBookmark}
+            disabled={saving}
             className={`p-2 rounded-lg transition-all duration-300 ${
               bookmarked
                 ? 'bg-accent-purple/20 text-accent-purple'
                 : 'bg-white/5 text-white/30 hover:text-white/60 hover:bg-white/10'
-            }`}
+            } ${saving ? 'opacity-50 cursor-wait' : ''}`}
           >
             <FiBookmark className={bookmarked ? 'fill-current' : ''} size={18} />
           </motion.button>
