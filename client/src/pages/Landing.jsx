@@ -70,9 +70,9 @@ export default function Landing() {
     <div className="page-container">
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="orb orb-purple w-[500px] h-[500px] -top-48 -left-48 opacity-20" />
-        <div className="orb orb-pink w-[400px] h-[400px] top-1/3 -right-48 opacity-15" />
-        <div className="orb orb-green w-[300px] h-[300px] bottom-20 left-1/4 opacity-10" />
+        <div className="orb orb-purple w-[500px] h-[500px] -top-48 -left-48 opacity-20" data-speed="0.6" />
+        <div className="orb orb-pink w-[400px] h-[400px] top-1/3 -right-48 opacity-15" data-speed="0.4" />
+        <div className="orb orb-green w-[300px] h-[300px] bottom-20 left-1/4 opacity-10" data-speed="0.5" />
       </div>
 
       {/* ===== HERO SECTION ===== */}
@@ -169,7 +169,7 @@ export default function Landing() {
               initial={{ opacity: 0, x: 50, rotateY: -10 }}
               animate={{ opacity: 1, x: 0, rotateY: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative hidden lg:block"
+              className="relative hidden lg:block" data-speed="0.85"
             >
               {/* Floating Cards */}
               <div className="relative">
@@ -287,7 +287,7 @@ export default function Landing() {
       </section>
 
       {/* ===== STATS SECTION ===== */}
-      <section className="relative py-20">
+      <section className="relative py-20 fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             {stats.map((stat, i) => (
@@ -300,7 +300,7 @@ export default function Landing() {
       {/* ===== POPULAR DOMAINS ===== */}
       <section className="relative py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <AnimatedSection className="text-center mb-12">
+          <AnimatedSection className="text-center mb-12 fade-up">
             <h2 className="text-3xl sm:text-4xl font-bold font-display text-white mb-4">
               Explore Popular <span className="gradient-text">Domains</span>
             </h2>
@@ -309,7 +309,7 @@ export default function Landing() {
             </p>
           </AnimatedSection>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6 fade-up">
             {domains.map((d, i) => (
               <DomainCard key={d.domain} {...d} delay={i * 0.08} />
             ))}
@@ -321,7 +321,7 @@ export default function Landing() {
       <section className="relative py-20">
         <div className="absolute inset-0 gradient-bg-mesh pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-          <AnimatedSection className="flex items-end justify-between mb-12">
+          <AnimatedSection className="flex items-end justify-between mb-12 fade-up">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold font-display text-white mb-4">
                 Featured <span className="gradient-text">Opportunities</span>
@@ -335,7 +335,7 @@ export default function Landing() {
             </Link>
           </AnimatedSection>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 fade-up">
             {featuredJobs.map((job, i) => (
               <JobCard key={job._id} job={job} delay={i * 0.08} />
             ))}
@@ -350,7 +350,7 @@ export default function Landing() {
       {/* ===== AI FEATURES ===== */}
       <section className="relative py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <AnimatedSection className="text-center mb-16">
+          <AnimatedSection className="text-center mb-16 fade-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-neon/10 border border-accent-neon/20 text-accent-neon text-sm font-medium mb-6">
               <FiCpu size={14} />
               Powered by AI
@@ -363,7 +363,7 @@ export default function Landing() {
             </p>
           </AnimatedSection>
 
-          <StaggerContainer className="grid sm:grid-cols-2 gap-6" staggerDelay={0.15}>
+          <StaggerContainer className="grid sm:grid-cols-2 gap-6 fade-up" staggerDelay={0.15}>
             {aiFeatures.map((feature, i) => (
               <StaggerItem key={i}>
                 <motion.div
@@ -397,7 +397,7 @@ export default function Landing() {
       <section className="relative py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <AnimatedSection>
-            <div className="relative rounded-3xl overflow-hidden">
+            <div className="relative rounded-3xl overflow-hidden scale-in">
               <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/20 via-accent-pink/10 to-accent-neon/5" />
               <div className="absolute inset-0 backdrop-blur-3xl" />
               <div className="relative z-10 text-center py-16 px-8">

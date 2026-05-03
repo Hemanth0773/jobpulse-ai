@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/layout/Navbar';
 import ChatWidget from './components/chat/ChatWidget';
+import SmoothScrollLayout from './components/SmoothScrollLayout';
 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -48,7 +49,7 @@ function AnimatedRoutes() {
         transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
         <Routes location={location}>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<SmoothScrollLayout><Landing /></SmoothScrollLayout>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
