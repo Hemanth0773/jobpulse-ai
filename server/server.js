@@ -58,29 +58,58 @@ Keep your answers helpful, concise, and professional. Use emojis sparingly to ke
       }
     };
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // Try multiple models (lite models have higher free-tier rate limits)
+    const models = ['gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+    let lastError = null;
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    for (const model of models) {
+      // Allow one retry per model for rate limits
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-    const data = await response.json();
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
 
-    if (!response.ok) {
-      console.error('Gemini API error:', JSON.stringify(data, null, 2));
-      return res.status(502).json({ reply: 'AI service is temporarily unavailable. Please try again.' });
+          const data = await response.json();
+
+          // Rate limited — wait and retry once
+          if (response.status === 429 && attempt === 0) {
+            console.log(`⏳ Rate limited on ${model}, retrying in 2s...`);
+            await new Promise(r => setTimeout(r, 2000));
+            continue;
+          }
+
+          if (!response.ok) {
+            console.error(`Gemini ${model} error (${response.status}):`, data?.error?.message || JSON.stringify(data));
+            lastError = data?.error?.message || `HTTP ${response.status}`;
+            break; // Try next model
+          }
+
+          const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          if (!reply) {
+            console.error(`Empty response from ${model}:`, JSON.stringify(data, null, 2));
+            lastError = 'Empty response';
+            break;
+          }
+
+          console.log(`✅ Response from ${model}`);
+          return res.json({ reply: reply.trim() });
+        } catch (fetchErr) {
+          console.error(`Fetch error for ${model}:`, fetchErr.message);
+          lastError = fetchErr.message;
+          break;
+        }
+      }
     }
 
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!reply) {
-      console.error('Unexpected Gemini response structure:', JSON.stringify(data, null, 2));
-      return res.status(502).json({ reply: 'Received an empty response from AI. Please try again.' });
-    }
-
-    res.json({ reply: reply.trim() });
+    // All models failed
+    console.error('All Gemini models failed. Last error:', lastError);
+    res.status(502).json({ reply: `AI service is temporarily unavailable. Please try again in a minute.` });
   } catch (error) {
     console.error('Chat API Error:', error.message);
     res.status(500).json({ reply: 'Sorry, something went wrong. Please try again.' });
